@@ -2,4 +2,5 @@
 
 class ValidatorTool:
     def validate(self, sql: str) -> bool:
-        return True
+        normalized = sql.strip()
+        return bool(normalized) and normalized.lower().startswith(("select", "insert", "update", "delete", "create", "alter", "drop"))

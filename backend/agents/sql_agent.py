@@ -1,8 +1,15 @@
 # agents/sql_agent.py
 
-class SQLAgent:
-    def __init__(self):
-        self.name = "sql_agent"
+from backend.services.llm import LLMService
 
-    def run(self, query: str) -> str:
-        return f"Executing SQL: {query}"
+
+class SQLGenerator:
+    def __init__(self, llm_service: LLMService | None = None):
+        self.llm = llm_service or LLMService()
+
+    def generate(self, prompt: str, schema_summary: str) -> str:
+        generation_prompt = (
+            f"Generate a SQL statement for the following request:\n\n{prompt}\n\n"
+            f"Use this schema information:\n{schema_summary}"
+        )
+        return self.llm.generate(generation_prompt)

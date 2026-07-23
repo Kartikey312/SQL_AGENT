@@ -11,6 +11,12 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from backend.models.table_model import Table
 from backend.parser.sp_parser import extract_procedures
 from backend.parser.table_parser import extract_tables
+from backend.agents.supervisor import Supervisor
+from backend.agents.sql_agent import SQLGenerator
+from backend.services.summarizer import Summarizer
+from backend.tools.schema_tool import SchemaTool
+from backend.tools.sql_tool import SQLTool
+from backend.tools.validator_tool import ValidatorTool
 
 UPLOAD_FOLDER = Path(__file__).resolve().parent / "uploads"
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -23,6 +29,14 @@ app = FastAPI(
 
 parsed_tables: List[Table] = []
 parsed_procedures: List[dict] = []
+
+supervisor = Supervisor(
+    schema_tool=SchemaTool(),
+    sql_generator=SQLGenerator(),
+    validator=ValidatorTool(),
+    sql_executor=SQLTool(),
+    summarizer=Summarizer(),
+)
 
 
 @app.get("/")
@@ -90,3 +104,12 @@ def get_relationships():
                 }
             )
     return relationships
+
+
+@app.post("/chat")
+def chat(request: dict):
+    prompt = request.get("prompt")
+    if not prompt:
+        raise HTTPException(status_code=400, detail="prompt is required")
+
+    return supervisor.run(prompt, parsed_tables, parsed_procedures)
