@@ -3,12 +3,12 @@ from sqlalchemy import create_engine
 import os
 
 DB_DRIVER = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
-DB_SERVER = os.getenv("DB_SERVER")
-DB_PORT = os.getenv("DB_PORT")
-DB_INSTANCE = os.getenv("DB_INSTANCE")
-DB_DATABASE = os.getenv("DB_DATABASE")
-DB_USERNAME = os.getenv("DB_USERNAME")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_SERVER = os.getenv("SOURCE_DB_SERVER")
+DB_PORT = os.getenv("SOURCE_DB_PORT")
+DB_INSTANCE = os.getenv("SOURCE_DB_INSTANCE")
+DB_DATABASE = os.getenv("SOURCE_DB_DATABASE")
+DB_USERNAME = os.getenv("SOURCE_DB_USERNAME")
+DB_PASSWORD = os.getenv("SOURCE_DB_PASSWORD")
 
 if DB_INSTANCE and DB_PORT:
     server_value = f"tcp:{DB_SERVER}\\{DB_INSTANCE},{DB_PORT}"
