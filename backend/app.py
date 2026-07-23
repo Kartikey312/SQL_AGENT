@@ -44,8 +44,7 @@ def root():
         "endpoints": ["/health", "/chat"],
         "usage": "POST /chat with JSON body {\"prompt\": \"your question\"}"
     }
-
-
+ 
 @app.get("/health")
 def health():
     try:
