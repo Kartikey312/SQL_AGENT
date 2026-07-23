@@ -24,26 +24,45 @@ class Supervisor:
 
     def run(self, user_request: str) -> dict:
         schema_summary = self.schema_tool.inspect()
-        generated_sql = self.sql_generator.generate(user_request, schema_summary)
-        is_valid = self.validator.validate(generated_sql)
-        execution_result = (
-            self.sql_executor.search(user_request)
-            if is_valid
-            else {"error": "SQL validation failed."}
-        )
+        plan = self.sql_generator.interpret(user_request, schema_summary)
+        action = plan.get("action", "answer")
+        query = plan.get("query", user_request).strip()
 
-        natural_answer = self.summarizer.summarize(
-            f"User request: {user_request}\n"
-            f"Generated SQL: {generated_sql}\n"
-            f"Validation: {is_valid}\n"
-            f"Execution result: {execution_result}"
-        )
+        if action == "describe":
+            tool_result = self.schema_tool.inspect()
+        elif action == "execute":
+            if not self.validator.validate(query):
+                tool_result = {
+                    "error": "SQL validation failed. Please provide a valid SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, or DROP statement."
+                }
+            else:
+                tool_result = self.sql_executor.execute(query)
+        elif action == "search":
+            tool_result = self.sql_executor.search(query)
+        else:
+            answer = self.summarizer.llm.generate(
+                f"Answer the following user request. Use the database schema only if it is relevant.\n\nSchema:\n{schema_summary}\n\nUser request:\n{user_request}"
+            )
+            tool_result = {"answer": answer}
+
+        if action == "answer":
+            natural_answer = tool_result.get("answer")
+        else:
+            natural_answer = self.summarizer.summarize(
+                {
+                    "request": user_request,
+                    "action": action,
+                    "query": query,
+                    "tool_result": tool_result,
+                    "schema_summary": schema_summary,
+                }
+            )
 
         return {
             "request": user_request,
+            "action": action,
+            "query": query,
+            "tool_result": tool_result,
             "schema_summary": schema_summary,
-            "generated_sql": generated_sql,
-            "is_valid": is_valid,
-            "execution_result": execution_result,
             "natural_answer": natural_answer,
         }

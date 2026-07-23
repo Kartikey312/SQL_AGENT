@@ -8,7 +8,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 
 from backend.agents.supervisor import Supervisor
 from backend.agents.sql_agent import SQLGenerator
@@ -21,7 +21,7 @@ from backend.database.connection import engine
 app = FastAPI(
     title="AI SQL Agent",
     version="1.0.0",
-    description="ChatGPT for SQL Server"
+    description="A database-aware chatbot backend with LLM-enhanced responses."
 )
 
 supervisor = Supervisor(
@@ -35,6 +35,16 @@ supervisor = Supervisor(
 
 class ChatRequest(BaseModel):
     prompt: str
+
+
+@app.get("/")
+def root():
+    return {
+        "message": "AI SQL Agent is running.",
+        "endpoints": ["/health", "/chat"],
+        "usage": "POST /chat with JSON body {\"prompt\": \"your question\"}"
+    }
+
 
 @app.get("/health")
 def health():
