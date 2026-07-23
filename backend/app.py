@@ -8,7 +8,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 
 from backend.agents.supervisor import Supervisor
 from backend.agents.sql_agent import SQLGenerator
@@ -46,12 +46,13 @@ def root():
     }
  
 @app.get("/health")
-def health():
+def health(response: Response):
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return {"status": "healthy", "db": "connected"}
     except Exception as exc:
+        response.status_code = 503
         return {"status": "unhealthy", "db_error": str(exc)}
 
 
