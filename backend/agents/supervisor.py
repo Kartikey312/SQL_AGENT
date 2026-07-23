@@ -22,14 +22,14 @@ class Supervisor:
         self.sql_executor = sql_executor
         self.summarizer = summarizer
 
-    def run(self, user_request: str, tables: list, procedures: list) -> dict:
-        schema_summary = self.schema_tool.inspect(tables, procedures)
+    def run(self, user_request: str) -> dict:
+        schema_summary = self.schema_tool.inspect()
         generated_sql = self.sql_generator.generate(user_request, schema_summary)
         is_valid = self.validator.validate(generated_sql)
         execution_result = (
-            self.sql_executor.execute(generated_sql)
+            self.sql_executor.search(user_request)
             if is_valid
-            else "SQL validation failed"
+            else {"error": "SQL validation failed."}
         )
 
         natural_answer = self.summarizer.summarize(

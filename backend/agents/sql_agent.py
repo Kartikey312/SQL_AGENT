@@ -1,15 +1,15 @@
 # agents/sql_agent.py
 
-from backend.services.llm import LLMService
+import re
 
 
 class SQLGenerator:
-    def __init__(self, llm_service: LLMService | None = None):
-        self.llm = llm_service or LLMService()
+    def __init__(self):
+        pass
 
     def generate(self, prompt: str, schema_summary: str) -> str:
-        generation_prompt = (
-            f"Generate a SQL statement for the following request:\n\n{prompt}\n\n"
-            f"Use this schema information:\n{schema_summary}"
+        terms = [term for term in re.findall(r"\w+", prompt) if len(term) > 2]
+        return (
+            f"SEARCH DATABASE FOR: {' '.join(terms)}\n"
+            f"Schema summary:\n{schema_summary}"
         )
-        return self.llm.generate(generation_prompt)

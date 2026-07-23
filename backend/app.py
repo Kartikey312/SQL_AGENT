@@ -112,4 +112,4 @@ def chat(request: dict):
     if not prompt:
         raise HTTPException(status_code=400, detail="prompt is required")
 
-    return supervisor.run(prompt, parsed_tables, parsed_procedures)
+    return supervisor.run(prompt)
