@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 
 
@@ -16,6 +16,6 @@ class ForeignKey(BaseModel):
 
 class Table(BaseModel):
     table_name: str
-    columns: List[Column] = []
-    primary_keys: List[str] = []
-    foreign_keys: List[ForeignKey] = []
+    columns: List[Column] = Field(default_factory=list)
+    primary_keys: List[str] = Field(default_factory=list)
+    foreign_keys: List[ForeignKey] = Field(default_factory=list)
